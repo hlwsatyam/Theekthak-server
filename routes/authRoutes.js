@@ -2,10 +2,36 @@ const express = require('express');
 const router = express.Router();
 const { handleGoogleAuth, checkUserExists, profileCreate } = require('../controllers/authController');
 const upload = require('../middlewares/upload');
+const User = require('../models/User');
 
 // POST /api/auth/google - Handle Google authentication
 router.post('/google', handleGoogleAuth);
 router.post('/profileCreate', profileCreate);
+
+
+
+
+
+router.get('/check-user/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findOne({ _id: id });
+
+    if (user) {
+      return res.json({ exists: true, user });
+    } else {
+      return res.json({ exists: false });
+    }
+  } catch (error) {
+    console.error('Error checking user:', error);
+    res.status(500).json({ exists: false, error: 'Internal server error' });
+  }
+});
+
+
+
+
+
 
 
 

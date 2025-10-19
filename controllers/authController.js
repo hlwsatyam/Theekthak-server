@@ -40,7 +40,7 @@ const handleGoogleAuth = async (req, res) => {
                 success: true,
                 user: {
                     id: user._id,
-                    uid: user.uid,
+                    uid: user.uid,  username: user.username,
                     email: user.email,
                     name: user.name,
                     photoURL: user.photoURL,
@@ -49,10 +49,25 @@ const handleGoogleAuth = async (req, res) => {
                 message: 'Login successful'
             });
         } else {
-            // Create new user
+            
+            
+      let baseUsername = displayName
+        ? displayName?.toLowerCase()?.replace(/\s+/g, '')
+        : email.split('@')[0];
+      
+      let uniqueUsername = baseUsername;
+      let counter = 1;
+
+      // Keep checking until a unique username is found
+      while (await User.findOne({ username: uniqueUsername })) {
+        uniqueUsername = `${baseUsername}${counter}`;
+        counter++;
+      }
+
+
             user = new User({
                 uid,
-                email,
+                email,username: uniqueUsername,
                 name:displayName,
                 photoURL: photoURL || '',
                 isNewUser: true
@@ -96,7 +111,7 @@ const handleGoogleAuth = async (req, res) => {
 const profileCreate = async (req, res) => {
   try {
     const { user } = req.body; // expecting { user: { name, uuid, phone } }
-console.log(req.body)
+ 
     if (!user || !user.id) {
       return res.status(400).json({
         success: false,
